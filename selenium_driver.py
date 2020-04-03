@@ -1,3 +1,4 @@
+import sys
 import time
 import simplejson
 from selenium import webdriver
@@ -34,7 +35,7 @@ class SocialMediaScraper():
         time.sleep(2)
 
     # search for users by #tag and #related_tags and return all users
-    def related_tags_search(self, tag, pics_per_tag=10):
+    def related_tags_search(self, tag, pics_per_tag=9):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
         insta_users, related_tags = scraper.get_usernames(tag, pics_per_tag)
@@ -56,7 +57,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts
-    def get_usernames(self, tag, pics_per_tag=10):
+    def get_usernames(self, tag, pics_per_tag=9):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -105,7 +106,7 @@ class SocialMediaScraper():
         return outarr, related_tags
 
     # search for users by #tag and #related_tags and return user's whose post has enough likes
-    def related_tags_search_by_likes(self, tag, pics_per_tag=10):
+    def related_tags_search_by_likes(self, tag, pics_per_tag=9):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
         insta_users, related_tags = scraper.get_usernames_by_likes(
@@ -130,7 +131,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_likes(self, tag, pics_per_tag=10, num_likes=1000):
+    def get_usernames_by_likes(self, tag, pics_per_tag=9, num_likes=1000):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -194,7 +195,7 @@ class SocialMediaScraper():
         return outarr, related_tags
 
     # search for users by #tag and #related_tags and return user's whose post is sponsered
-    def related_tags_search_paid_promo(self, tag, pics_per_tag=10):
+    def related_tags_search_paid_promo(self, tag, pics_per_tag=9):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
         insta_users, related_tags = scraper.get_usernames_by_paid_promo(
@@ -218,7 +219,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_paid_promo(self, tag, pics_per_tag=10):
+    def get_usernames_by_paid_promo(self, tag, pics_per_tag=9):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -314,8 +315,11 @@ class SocialMediaScraper():
 if __name__ == "__main__":
 
     # tag to search
-    tag = ["leagueoflegends", "esports", "twitch", "apexlegends",
-           "xbox", "playstation", "games", "contentcreator"]
+    # gaming    ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"]
+    # food      ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"]    
+    # rand      ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"]
+    # travel    ["travel", ]
+    tag = ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"]
 
     for tt in tag:
 
@@ -324,7 +328,12 @@ if __name__ == "__main__":
         scraper.setUp()
         scraper.login("bountifulapps", "jamesharden2020")
 
-        insta_users = scraper.related_tags_search_by_likes(tt, 10)
+        insta_users = scraper.related_tags_search_by_likes(tt, 9)
+
+        # sometimes api limits the scraping. try again
+        if len(insta_users) <= 1: 
+            insta_users = scraper.related_tags_search_by_likes(tt, 9)
+
         scraper.write_arr_to_file(tt, insta_users)
 
         scraper.tearDown()
