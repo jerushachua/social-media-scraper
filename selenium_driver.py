@@ -1,6 +1,7 @@
 import time
 import simplejson
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -10,7 +11,11 @@ from selenium.webdriver.common.action_chains import ActionChains
 class SocialMediaScraper():
 
     def setUp(self):
-        self.driver = webdriver.Chrome('./chromedriver.exe')
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--window-size=1920x1080")
+        self.driver = webdriver.Chrome(
+            "./chromedriver.exe", chrome_options=chrome_options)
 
     def tearDown(self):
         self.driver.close()
@@ -28,13 +33,13 @@ class SocialMediaScraper():
         passInput.send_keys(Keys.ENTER)
         time.sleep(2)
 
-    # search for users by #tag and #related_tags and return all users 
-    def related_tags_search(self, tag, pics_per_tag=100):
+    # search for users by #tag and #related_tags and return all users
+    def related_tags_search(self, tag, pics_per_tag=10):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
         insta_users, related_tags = scraper.get_usernames(tag, pics_per_tag)
-        
-        # log the #tags we are visiting 
+
+        # log the #tags we are visiting
         file = open("output.txt", "w")
         simplejson.dump(related_tags, file)
         file.close()
@@ -51,7 +56,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts
-    def get_usernames(self, tag, pics_per_tag=100):
+    def get_usernames(self, tag, pics_per_tag=10):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -99,20 +104,23 @@ class SocialMediaScraper():
 
         return outarr, related_tags
 
-    # search for users by #tag and #related_tags and return user's whose post has enough likes  
-    def related_tags_search_by_likes(self, tag, pics_per_tag=100):
+    # search for users by #tag and #related_tags and return user's whose post has enough likes
+    def related_tags_search_by_likes(self, tag, pics_per_tag=10):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
-        insta_users, related_tags = scraper.get_usernames_by_likes(tag, pics_per_tag)
+        insta_users, related_tags = scraper.get_usernames_by_likes(
+            tag, pics_per_tag)
 
-        # log the #tags we are visiting 
-        file = open("output.txt", "w")
+        # log the #tags we are visiting
+        filename = str(tag) + ".txt"
+        file = open(filename, "w")
         simplejson.dump(related_tags, file)
         file.close()
 
         new_user_li, new_related_tags = [], []
         for edge in related_tags:
-            new_user_li, new_related_tags = scraper.get_usernames_by_likes(edge, pics_per_tag)
+            new_user_li, new_related_tags = scraper.get_usernames_by_likes(
+                edge, pics_per_tag)
 
             # combine the lists with no dups
             new_user_set = set(new_user_li)
@@ -122,7 +130,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_likes(self, tag, pics_per_tag=100, num_likes=1000):
+    def get_usernames_by_likes(self, tag, pics_per_tag=10, num_likes=1000):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -141,10 +149,10 @@ class SocialMediaScraper():
             related_tags.append(clean_tag)
 
         # iterate through each image by right arrow key
-        # if the #tag has an emoji, the DOM changes slightly. 
-        try: 
+        # if the #tag has an emoji, the DOM changes slightly.
+        try:
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
-        except: 
+        except:
             time.sleep(2)
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
         while pics_per_tag >= 0:
@@ -167,11 +175,12 @@ class SocialMediaScraper():
 
                         # append to array if photo has at least num_likes
                         if href not in outarr:
-                            try: 
-                                likes_str = driver.find_element_by_xpath("//div/div/button/span").text
+                            try:
+                                likes_str = driver.find_element_by_xpath(
+                                    "//div/div/button/span").text
                                 likes_int = int(likes_str.replace(",", ""))
                                 print(likes_str)
-                                if likes_int >= num_likes: 
+                                if likes_int >= num_likes:
                                     outarr.append(href)
                             except:
                                 print("This photo has no likes. ")
@@ -184,20 +193,22 @@ class SocialMediaScraper():
 
         return outarr, related_tags
 
-    # search for users by #tag and #related_tags and return user's whose post is sponsered  
-    def related_tags_search_paid_promo(self, tag, pics_per_tag=100):
+    # search for users by #tag and #related_tags and return user's whose post is sponsered
+    def related_tags_search_paid_promo(self, tag, pics_per_tag=10):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
-        insta_users, related_tags = scraper.get_usernames_by_paid_promo(tag, pics_per_tag)
+        insta_users, related_tags = scraper.get_usernames_by_paid_promo(
+            tag, pics_per_tag)
 
-        # log the #tags we are visiting 
+        # log the #tags we are visiting
         file = open("output.txt", "w")
         simplejson.dump(related_tags, file)
         file.close()
 
         new_user_li, new_related_tags = [], []
         for edge in related_tags:
-            new_user_li, new_related_tags = scraper.get_usernames_by_paid_promo(edge, pics_per_tag)
+            new_user_li, new_related_tags = scraper.get_usernames_by_paid_promo(
+                edge, pics_per_tag)
 
             # combine the lists with no dups
             new_user_set = set(new_user_li)
@@ -207,7 +218,7 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_paid_promo(self, tag, pics_per_tag=100):
+    def get_usernames_by_paid_promo(self, tag, pics_per_tag=10):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
@@ -226,10 +237,10 @@ class SocialMediaScraper():
             related_tags.append(clean_tag)
 
         # iterate through each image by right arrow key
-        # if the #tag has an emoji, the DOM changes slightly. 
-        try: 
+        # if the #tag has an emoji, the DOM changes slightly.
+        try:
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
-        except: 
+        except:
             time.sleep(2)
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
         while pics_per_tag >= 0:
@@ -252,15 +263,16 @@ class SocialMediaScraper():
 
                         # append to array if photo is a paid promotion
                         if href not in outarr:
-                            try: 
+                            try:
                                 promo_str = "Paid partnership with "
-                                likes_str = driver.find_element_by_xpath("//*[contains(text(),'" + promo_str + "')]")
+                                likes_str = driver.find_element_by_xpath(
+                                    "//*[contains(text(),'" + promo_str + "')]")
                                 outarr.append(href)
                                 print("This photo is a paid promotion. ")
                                 break
                             except:
                                 pass
-                            
+
             # move right
             actions.send_keys(Keys.RIGHT).perform()
             time.sleep(1)
@@ -291,23 +303,28 @@ class SocialMediaScraper():
 
         return content_creators
 
-    def write_arr_to_file(self, arr): 
-        with open("output.txt", "a") as f:
+    def write_arr_to_file(self, tag, arr):
+        filename = str(tag) + ".txt"
+        with open(filename, "a") as f:
             for item in arr:
                 f.write("%s\n" % item)
         f.close()
 
+
 if __name__ == "__main__":
 
     # tag to search
-    tag = "sushi"
+    tag = ["leagueoflegends", "esports", "twitch", "apexlegends",
+           "xbox", "playstation", "games", "contentcreator"]
 
-    # set up scraper
-    scraper = SocialMediaScraper()
-    scraper.setUp()
-    scraper.login("bountifulapps", "jamesharden2020")
+    for tt in tag:
 
-    insta_users = scraper.related_tags_search_paid_promo(tag, 5)
-    scraper.write_arr_to_file(insta_users)
+        # set up scraper
+        scraper = SocialMediaScraper()
+        scraper.setUp()
+        scraper.login("bountifulapps", "jamesharden2020")
 
-    scraper.tearDown()
+        insta_users = scraper.related_tags_search_by_likes(tt, 10)
+        scraper.write_arr_to_file(tt, insta_users)
+
+        scraper.tearDown()
