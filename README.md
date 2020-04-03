@@ -9,3 +9,4 @@ Chromedriver is for Chrome version 80. Update as needed.
 
 `python ./selenium_driver.py`
 
+Use the `related_tags_search_by_likes` method to get usernames of those who post top #tagged posts and filter by minimum number of likes. 
