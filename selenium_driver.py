@@ -57,7 +57,6 @@ class SocialMediaScraper():
 
         return insta_users
 
-    # return a list of users who post top #tagged posts if it has > num_likes
     def get_usernames_by_likes(self, tag, num_likes=1000):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
@@ -94,8 +93,6 @@ class SocialMediaScraper():
 
             # scrape all <a> tags to find the href attribute
             # 6th element from this array is the poster of the image
-            # once found, break and go to next image
-            # we only want the poster, not all commenters
             for aa in aa_tags:
                 href = aa.get_attribute("href")
                 if href:
@@ -125,55 +122,38 @@ class SocialMediaScraper():
 
         return outarr, related_tags
 
-    # search for users by #tag and #related_tags and return user's whose post is sponsered
+    # search for users by #ad and return users whose post is sponsered
     def related_tags_search_paid_promo(self, tag):
         # get insta usernames by searching for tag, and by how many pics to go through
-        related_tags = []
-        insta_users, related_tags = scraper.get_usernames_by_paid_promo(tag)
+        insta_users = scraper.get_usernames_by_paid_promo(tag)
 
         # log the #tags we are visiting
         filename = str(tag) + ".csv"
         with open(filename, mode='w') as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            for item in related_tags: 
-                writer.writerow([item])
-
-        new_user_li, new_related_tags = [], []
-        for edge in related_tags:
-            new_user_li, new_related_tags = scraper.get_usernames_by_paid_promo(edge)
-
-            # combine the lists with no dups
-            new_user_set = set(new_user_li)
-            old_users = set(insta_users)
-            insta_users = insta_users + list(new_user_set - old_users)
-
+            writer.writerow([tag])
+        
         return insta_users
 
-    # return a list of users who post top #tagged posts if it has > num_likes
     def get_usernames_by_paid_promo(self, tag):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
         driver.get(URL)
-        pics_per_tag = 255
+        pics_per_tag = 1024
+
+        # start search
+        print("Searching through " + str(tag))
 
         # xpath definitions
         all_images_xpath = "/html/body/div[1]/section/main/article/div[1]/div/div[1]/div/div"
-
-        # get list of related #tags
-        related_tags = []
-        related_tags_xpath = "//span[2]/div/a"
-        related = driver.find_elements_by_xpath("//span[2]/div/a")
-        for hashtag in related:
-            clean_tag = hashtag.text
-            clean_tag = clean_tag.replace("#", "")
-            related_tags.append(clean_tag)
 
         # iterate through each image by right arrow key
         # if the #tag has an emoji, the DOM changes slightly.
         try:
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
         except:
+            driver.get(URL)
             time.sleep(2)
             driver.find_elements_by_xpath(all_images_xpath)[0].click()
         while pics_per_tag >= 0:
@@ -182,8 +162,6 @@ class SocialMediaScraper():
 
             # scrape all <a> tags to find the href attribute
             # 6th element from this array is the poster of the image
-            # once found, break and go to next image
-            # we only want the poster, not all commenters
             for aa in aa_tags:
                 href = aa.get_attribute("href")
                 if href:
@@ -211,7 +189,7 @@ class SocialMediaScraper():
             time.sleep(1)
             pics_per_tag -= 1
 
-        return outarr, related_tags
+        return outarr
 
     # write the array to a text file
     def write_arr_to_file(self, tag, arr):
@@ -225,43 +203,51 @@ class SocialMediaScraper():
 if __name__ == "__main__":
 
     # file parameters
-    if len(sys.argv) < 4: 
+    if len(sys.argv) < 3: 
         print("Incorrect arguments. ")
         print("Make sure you have all arguments: username, password, and tag genre. ")
         print("Example command: ")
         print("python selenium_driver.py twsizzle ****** travel")
-        username = raw_input("username: ")
-        password = raw_input("password: ")
-        tag_genre = raw_input("tag genre: ") 
+        username = input("username: ")
+        password = input("password: ")
+        tag_genre = input("tag genre: ") 
     else: 
         username = str(sys.argv[1])
         password = str(sys.argv[2])
-        tag_genre = str(sys.argv[3])
+        try: 
+            tag_genre = str(sys.argv[3])
+        except:
+            tag_genre = ""
 
     # set up scraper
-    # "bountifulapps", "jamesharden2020"
     scraper = SocialMediaScraper()
     scraper.setUp()
     scraper.login(username, password)
 
     # tag to search
     tag_dict = {
+        "ad": ["ad"], 
         "gaming": ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"], 
         "food": ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"], 
-        "rand": ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"], 
+        "rand": ["random", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"], 
         "travel": ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"]
     }
 
     tag = tag_dict.get(tag_genre, ["instagram"])
 
-    for tt in tag:
+    if tag_genre == "ad": 
+        for tt in tag:
+            insta_users = scraper.related_tags_search_paid_promo(tt)
 
-        insta_users = scraper.related_tags_search_by_likes(tt)
+    else: 
+        for tt in tag:
+            insta_users = scraper.related_tags_search_paid_promo(tt)
 
-        # sometimes api limits the scraping. try again
-        if len(insta_users) <= 1:
-            insta_users = scraper.related_tags_search_by_likes(tt)
+            # sometimes api limits the scraping. try again
+            if len(insta_users) <= 1:
+                insta_users = scraper.related_tags_search_by_likes(tt)
 
-        scraper.write_arr_to_file(tt, insta_users)
+    
+    scraper.write_arr_to_file(tt, insta_users)
 
     scraper.tearDown()
