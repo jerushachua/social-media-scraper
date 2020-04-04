@@ -1,10 +1,11 @@
+import csv
 import sys
 import time
-import simplejson
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 
 
 class SocialMediaScraper():
@@ -33,22 +34,21 @@ class SocialMediaScraper():
         time.sleep(2)
 
     # search for users by #tag and #related_tags and return user's whose post has enough likes
-    def related_tags_search_by_likes(self, tag, pics_per_tag=9):
+    def related_tags_search_by_likes(self, tag):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
-        insta_users, related_tags = scraper.get_usernames_by_likes(
-            tag, pics_per_tag)
+        insta_users, related_tags = scraper.get_usernames_by_likes(tag)
 
         # log the #tags we are visiting
-        filename = str(tag) + ".txt"
-        file = open(filename, "w")
-        simplejson.dump(related_tags, file)
-        file.close()
+        filename = str(tag) + ".csv"
+        with open(filename, mode='w') as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for item in related_tags: 
+                writer.writerow([item])
 
         new_user_li, new_related_tags = [], []
         for edge in related_tags:
-            new_user_li, new_related_tags = scraper.get_usernames_by_likes(
-                edge, pics_per_tag)
+            new_user_li, new_related_tags = scraper.get_usernames_by_likes(edge)
 
             # combine the lists with no dups
             new_user_set = set(new_user_li)
@@ -58,11 +58,12 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_likes(self, tag, pics_per_tag=9, num_likes=1000):
+    def get_usernames_by_likes(self, tag, num_likes=1000):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
         driver.get(URL)
+        pics_per_tag = 9 
 
         # start search
         print("Searching through " + str(tag))
@@ -125,21 +126,21 @@ class SocialMediaScraper():
         return outarr, related_tags
 
     # search for users by #tag and #related_tags and return user's whose post is sponsered
-    def related_tags_search_paid_promo(self, tag, pics_per_tag=9):
+    def related_tags_search_paid_promo(self, tag):
         # get insta usernames by searching for tag, and by how many pics to go through
         related_tags = []
-        insta_users, related_tags = scraper.get_usernames_by_paid_promo(
-            tag, pics_per_tag)
+        insta_users, related_tags = scraper.get_usernames_by_paid_promo(tag)
 
         # log the #tags we are visiting
-        file = open("output.txt", "w")
-        simplejson.dump(related_tags, file)
-        file.close()
+        filename = str(tag) + ".csv"
+        with open(filename, mode='w') as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for item in related_tags: 
+                writer.writerow([item])
 
         new_user_li, new_related_tags = [], []
         for edge in related_tags:
-            new_user_li, new_related_tags = scraper.get_usernames_by_paid_promo(
-                edge, pics_per_tag)
+            new_user_li, new_related_tags = scraper.get_usernames_by_paid_promo(edge)
 
             # combine the lists with no dups
             new_user_set = set(new_user_li)
@@ -149,11 +150,12 @@ class SocialMediaScraper():
         return insta_users
 
     # return a list of users who post top #tagged posts if it has > num_likes
-    def get_usernames_by_paid_promo(self, tag, pics_per_tag=9):
+    def get_usernames_by_paid_promo(self, tag):
         outarr = [u'https://www.instagram.com/']
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
         driver.get(URL)
+        pics_per_tag = 255
 
         # xpath definitions
         all_images_xpath = "/html/body/div[1]/section/main/article/div[1]/div/div[1]/div/div"
@@ -213,34 +215,52 @@ class SocialMediaScraper():
 
     # write the array to a text file
     def write_arr_to_file(self, tag, arr):
-        filename = str(tag) + ".txt"
-        with open(filename, "a") as f:
-            for item in arr:
-                f.write("%s\n" % item)
-        f.close()
-
+        filename = str(tag) + ".csv"
+        with open(filename, mode='a') as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for item in arr: 
+                writer.writerow([item])
+        file.close()
 
 if __name__ == "__main__":
 
+    # file parameters
+    if len(sys.argv) < 4: 
+        print("Incorrect arguments. ")
+        print("Make sure you have all arguments: username, password, and tag genre. ")
+        print("Example command: ")
+        print("python selenium_driver.py twsizzle ****** travel")
+        username = raw_input("username: ")
+        password = raw_input("password: ")
+        tag_genre = raw_input("tag genre: ") 
+    else: 
+        username = str(sys.argv[1])
+        password = str(sys.argv[2])
+        tag_genre = str(sys.argv[3])
+
     # set up scraper
+    # "bountifulapps", "jamesharden2020"
     scraper = SocialMediaScraper()
     scraper.setUp()
-    scraper.login("bountifulapps", "jamesharden2020")
+    scraper.login(username, password)
 
     # tag to search
-    # gaming    ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"]
-    # food      ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"]
-    # rand      ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"]
-    # travel    ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"]
-    tag = ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"]
+    tag_dict = {
+        "gaming": ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"], 
+        "food": ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"], 
+        "rand": ["ad", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"], 
+        "travel": ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"]
+    }
+
+    tag = tag_dict.get(tag_genre, ["instagram"])
 
     for tt in tag:
 
-        insta_users = scraper.related_tags_search_by_likes(tt, 9)
+        insta_users = scraper.related_tags_search_by_likes(tt)
 
         # sometimes api limits the scraping. try again
         if len(insta_users) <= 1:
-            insta_users = scraper.related_tags_search_by_likes(tt, 9)
+            insta_users = scraper.related_tags_search_by_likes(tt)
 
         scraper.write_arr_to_file(tt, insta_users)
 
