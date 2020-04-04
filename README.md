@@ -12,11 +12,6 @@ Chromedriver is for Chrome version 80. Update as needed.
 
 # Methods 
 
-`related_tags_search(tag, pics_per_tag)` 
-
- * Searches by hashtag and all related hashtags. 
- * Returns an array of users who posted top tagged posts. 
- * Use `pics_per_tag` to specify how many users per tag to collect. 
 
 `related_tags_search_by_likes(tag, pics_per_tag, num_likes)`
 
