@@ -4,3 +4,6 @@
 
 # directories
 ./
+
+# python
+__pycache__/

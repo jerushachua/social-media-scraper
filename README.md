@@ -7,7 +7,7 @@ Chromedriver is for Chrome version 80. Update as needed.
 
 `pip install selenium`
 
-`python selenium_driver.py username password genre`
+`python main.py username password genre`
 
 Input your instagram `username`, `password`, and `genre` of the tags to search. 
 
