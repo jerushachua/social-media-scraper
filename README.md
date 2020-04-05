@@ -31,3 +31,8 @@ If `ad` is passed in as the tag genre, it will search by the paid promotion meth
  * Searches the #ad hashtag for posts with have `paid promotion` labelled. 
  * Visits 1024 photos. 
  * Returns an array of users who post have the `paid promotion` label. 
+
+
+# Output 
+
+A `.csv` file for each tag searched. The naming convention is `date-tag.csv`. 
