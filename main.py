@@ -28,7 +28,7 @@ scraper.login(username, password)
 # tag to search
 tag_dict = {
     "ad": ["ad"],
-    "test": ["stayhome"],
+    "test": ["nba"],
     "gaming": ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"],
     "food": ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"],
     "rand": ["random", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"],

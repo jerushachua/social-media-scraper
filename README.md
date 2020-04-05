@@ -5,7 +5,7 @@ Chromedriver is for Chrome version 80. Update as needed.
 
 # How to use
 
-`pip install selenium`
+`pip install selenium`, `pip install progressbar`
 
 `python main.py username password genre`
 
@@ -36,3 +36,8 @@ If `ad` is passed in as the tag genre, it will search by the paid promotion meth
 # Output 
 
 A `.csv` file for each tag searched. The naming convention is `date-tag.csv`. 
+
+
+# Debug 
+
+Sometimes the headless chromedriver doesn't quit properly. Call `killall chromedriver.exe` to close all chromedriver instances. 

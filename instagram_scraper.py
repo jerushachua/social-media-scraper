@@ -20,7 +20,7 @@ class InstagramScraper():
             "./chromedriver.exe", chrome_options=chrome_options)
 
     def tearDown(self):
-        self.driver.close()
+        self.driver.quit()
 
     def login(self, username, password):
         driver = self.driver
@@ -86,10 +86,10 @@ class InstagramScraper():
         all_images_xpath = "/html/body/div[1]/section/main/article/div[1]/div/div[1]/div/div"
 
         # start search and progress bar 
-        print("Searching through " + str(tag))
         bar = progressbar.ProgressBar(maxval=10,
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start() 
+        print("Searching through " + str(tag))
         bb = 0
 
         # iterate through each image by right arrow key
@@ -162,7 +162,7 @@ class InstagramScraper():
 
         # start search and progress bar
         print("Searching through " + str(tag))
-        bar = progressbar.ProgressBar(maxval=1024,
+        bar = progressbar.ProgressBar(maxval=1025,
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.start()
         ii = 0
