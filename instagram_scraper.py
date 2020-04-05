@@ -6,6 +6,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
+import progressbar
+
 
 class InstagramScraper():
 
@@ -35,10 +37,10 @@ class InstagramScraper():
 
     # search for users by #tag and #related_tags and return user's whose post has enough likes
     def related_tags_search_by_likes(self, tag):
-        insta_users = {} 
+        insta_users = {}
         related_tags = self.get_related_tags(tag)
 
-        # start the log 
+        # start the log
         filename = time.strftime("%Y-%m-%d") + "-" + str(tag) + ".csv"
         with open(filename, mode='w') as file:
             writer = csv.writer(file, delimiter=',',
@@ -46,15 +48,15 @@ class InstagramScraper():
             for item in related_tags:
                 writer.writerow([item])
 
-        # first tag 
+        # first tag
         insta_users.fromkeys(self.get_usernames_by_likes(tag), 1)
 
-        # related tags 
+        # related tags
         for edge in related_tags:
-            # see if user is already in dict  
+            # see if user is already in dict
             new_users_dict = self.get_usernames_by_likes(edge)
-            for new_user in new_users_dict.keys(): 
-                if new_user not in insta_users.keys(): 
+            for new_user in new_users_dict.keys():
+                if new_user not in insta_users.keys():
                     insta_users[new_user] = 1
 
         return insta_users
@@ -83,8 +85,12 @@ class InstagramScraper():
         pics_per_tag = 9
         all_images_xpath = "/html/body/div[1]/section/main/article/div[1]/div/div[1]/div/div"
 
-        # start search
+        # start search and progress bar 
         print("Searching through " + str(tag))
+        bar = progressbar.ProgressBar(maxval=10,
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start() 
+        bb = 0
 
         # iterate through each image by right arrow key
         # if the #tag has an emoji, the DOM changes slightly.
@@ -121,30 +127,29 @@ class InstagramScraper():
                                 break
                             except:
                                 pass
-                            
-            num = pics_per_tag % 3 + 1 
-            s = "." * num 
-            print(s, end =" ")
 
             # move right
             actions.send_keys(Keys.RIGHT).perform()
             time.sleep(1)
             pics_per_tag -= 1
+            bb += 1
+            bar.update(bb)
 
         return outarr
 
     # search for users by #ad and return users whose post is sponsered
     def related_tags_search_paid_promo(self, tag):
-        insta_users = {} 
+        insta_users = {}
 
-        # start the log 
+        # start the log
         filename = time.strftime("%Y-%m-%d") + "-" + str(tag) + ".csv"
         with open(filename, mode='w') as file:
             writer = csv.writer(file, delimiter=',',
                                 quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow([tag])
 
-        insta_users = insta_users.fromkeys(self.get_usernames_by_paid_promo(tag), 1)
+        insta_users = insta_users.fromkeys(
+            self.get_usernames_by_paid_promo(tag), 1)
         return insta_users
 
     def get_usernames_by_paid_promo(self, tag):
@@ -152,11 +157,15 @@ class InstagramScraper():
         driver = self.driver
         URL = "https://www.instagram.com/explore/tags/" + tag
         driver.get(URL)
-        pics_per_tag = 100
+        pics_per_tag = 1024
         all_images_xpath = "/html/body/div[1]/section/main/article/div[1]/div/div[1]/div/div"
 
-        # start search
+        # start search and progress bar
         print("Searching through " + str(tag))
+        bar = progressbar.ProgressBar(maxval=1024,
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.start()
+        ii = 0
 
         # iterate through each image by right arrow key
         # if the #tag has an emoji, the DOM changes slightly.
@@ -183,7 +192,7 @@ class InstagramScraper():
                     if tok <= 4:
 
                         # append to array if photo is a paid promotion
-                        if href not in outarr.keys(): 
+                        if href not in outarr.keys():
                             try:
                                 promo_str = "Paid partnership with "
                                 likes_str = driver.find_element_by_xpath(
@@ -192,15 +201,13 @@ class InstagramScraper():
                                 break
                             except:
                                 pass
-            
-            num = pics_per_tag % 3 + 1 
-            s = "." * num 
-            print(s, end ="")
 
             # move right
             actions.send_keys(Keys.RIGHT).perform()
             time.sleep(1)
             pics_per_tag -= 1
+            ii += 1
+            bar.update(ii)
 
         return outarr
 
@@ -213,4 +220,3 @@ class InstagramScraper():
             for item in arr.keys():
                 writer.writerow([item])
         file.close()
-
