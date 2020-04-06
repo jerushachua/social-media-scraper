@@ -224,11 +224,11 @@ class InstagramScraper():
         # read in file in the given directory and extract profile urls
         for name in filenames:
             business_emails = {}
-            tag_name = ""
+            print("Searching ... " + str(name))
+            
             with open(name, mode="r") as file:
                 profile_urls = file.readlines()[10:]
-
-                print(profile_urls)
+                timeout = 0
 
                 # visit each profile url
                 for url in profile_urls:
@@ -239,21 +239,28 @@ class InstagramScraper():
                     try:
                         profile_text = driver.find_element_by_xpath(
                             profile_text_xpath).text
-                        print("match xpath 1")
                     except:
                         print("Cannot find profile text. ")
                         continue
-                        profile_text_xpath = "//section/main/div/div[1]/span"
-                        profile_text = driver.find_element_by_xpath(profile_text_xpath).text
+                        
+                        # profile_text_xpath = "//section/main/div/div[1]/span"
+                        # profile_text = driver.find_element_by_xpath(profile_text_xpath).text
                     email = re.search('\S+@\S+', profile_text)
                     if email:
                         print(email.group(0))
                         business_emails[email.group(0)] = 1
 
             file.close()
+            if len(business_emails) == 0:
+                timeout += 1
+            if timeout >= 5: 
+                print("Cannot find any profiles after searching 5 files.")
+                print("Likely the account has blocked viewing profiles. ")
+                self.tearDown() 
+
             self.write_arr_to_file("email", business_emails)
 
-        return business_emails
+        return 
 
     # write the array to a text file
     def write_arr_to_file(self, tag, arr):
