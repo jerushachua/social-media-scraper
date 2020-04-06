@@ -33,6 +33,12 @@ If `ad` is passed in as the tag genre, it will search by the paid promotion meth
  * Returns an array of users who post have the `paid promotion` label. 
 
 
+ `get_insta_profile_emails(dirname)`
+
+  * Takes in a file directory name and searches the lists of instagram profiles. 
+  * Outputs a csv of all emails scraped. 
+
+
 # Output 
 
 A `.csv` file for each tag searched. The naming convention is `date-tag.csv`. 
