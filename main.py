@@ -42,7 +42,7 @@ if tag_genre == "ad":
 elif tag_genre == "emails": 
     dirname = "2020-04-05"
     email_dict = scraper.get_insta_profile_emails(dirname)
-    scraper.write_arr_to_file(dirname, email_dict)
+    # scraper.write_arr_to_file(dirname, email_dict)
 else:
     for tt in tag:
         insta_users = scraper.related_tags_search_by_likes(tt)

@@ -219,11 +219,12 @@ class InstagramScraper():
     def get_insta_profile_emails(self, dirname):
         driver = self.driver
         filenames = glob.glob(str(dirname) + "/*")
-        business_emails = {}
         profile_text_xpath = "//section/div[2]/span"
         
         # read in file in the given directory and extract profile urls
         for name in filenames:
+            business_emails = {}
+            tag_name = ""
             with open(name, mode="r") as file:
                 profile_urls = file.readlines()[10:]
 
@@ -250,7 +251,8 @@ class InstagramScraper():
                         business_emails[email.group(0)] = 1
 
             file.close()
-            break
+            self.write_arr_to_file("email", business_emails)
+
         return business_emails
 
     # write the array to a text file
