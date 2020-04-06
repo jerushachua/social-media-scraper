@@ -1,5 +1,7 @@
+import glob
 import csv
 import time
+import re
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -35,6 +37,8 @@ class InstagramScraper():
         passInput.send_keys(Keys.ENTER)
         time.sleep(2)
 
+        # verify 
+    
     # search for users by #tag and #related_tags and return user's whose post has enough likes
     def related_tags_search_by_likes(self, tag):
         insta_users = {}
@@ -210,6 +214,44 @@ class InstagramScraper():
             bar.update(ii)
 
         return outarr
+
+    # read instagram profiles in given directory
+    def get_insta_profile_emails(self, dirname):
+        driver = self.driver
+        filenames = glob.glob(str(dirname) + "/*")
+        business_emails = {}
+        profile_text_xpath = "//section/div[2]/span"
+        
+        # read in file in the given directory and extract profile urls
+        for name in filenames:
+            with open(name, mode="r") as file:
+                profile_urls = file.readlines()[10:]
+
+                print(profile_urls)
+
+                # visit each profile url
+                for url in profile_urls:
+                    if url == "https://www.instagram.com/\n":
+                        continue
+                    driver.get(url)
+                    time.sleep(1)
+                    try:
+                        profile_text = driver.find_element_by_xpath(
+                            profile_text_xpath).text
+                        print("match xpath 1")
+                    except:
+                        print("Cannot find profile text. ")
+                        continue
+                        profile_text_xpath = "//section/main/div/div[1]/span"
+                        profile_text = driver.find_element_by_xpath(profile_text_xpath).text
+                    email = re.search('\S+@\S+', profile_text)
+                    if email:
+                        print(email.group(0))
+                        business_emails[email.group(0)] = 1
+
+            file.close()
+            break
+        return business_emails
 
     # write the array to a text file
     def write_arr_to_file(self, tag, arr):

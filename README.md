@@ -40,4 +40,4 @@ A `.csv` file for each tag searched. The naming convention is `date-tag.csv`.
 
 # Debug 
 
-Sometimes the headless chromedriver doesn't quit properly. Call `killall chromedriver.exe` to close all chromedriver instances. 
+Sometimes the headless chromedriver doesn't quit properly. Check `top -n 1` to list the running processes. Call `killall chromedriver.exe` to close all chromedriver instances. 
