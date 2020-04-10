@@ -6,11 +6,12 @@ import instagram_scraper
 # tag to search
 tag_dict = {
     "ad": ["ad"],
-    "test": ["nba"],
     "gaming": ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"],
     "food": ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"],
-    "rand": ["random", "spring", "summer", "fall", "winter", "goodvibes", "fitness", "blogger"],
-    "travel": ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"]
+    "travel": ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"], 
+    "insta": ["instagram", "youtube", "sponsor", "influencer", "tiktok", "blogger", "goodvides", "ootd"],
+    "lifestyle": ["lifestyle", "home", "architecture", "minimalism", "throwback", "decor", "interior", "art"], 
+    "rand": ["stayhome", "random", "spring", "summer", "fall", "winter", "fitness", "family"]
 }
 
 # file parameters
@@ -40,7 +41,7 @@ if tag_genre == "ad":
     insta_users = scraper.related_tags_search_paid_promo("ad")
     scraper.write_arr_to_file("ad", insta_users)
 elif tag_genre == "emails": 
-    dirname = "2020-04-02"
+    dirname = input("directory name: ")
     scraper.get_insta_profile_emails(dirname)
 else:
     for tt in tag:
