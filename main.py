@@ -9,7 +9,7 @@ tag_dict = {
     "gaming": ["leagueoflegends", "esports", "twitch", "apexlegends", "xbox", "playstation", "games", "fortnite"],
     "food": ["instafood", "baking", "sourdough", "thefeedfeed", "pasta", "foodtography", "buzzfeast", "beautifulcuisines"],
     "travel": ["travel", "sanfrancisco", "nyc", "japan", "usa", "roadtrip", "downtown", "city"], 
-    "insta": ["instagram", "youtube", "sponsor", "influencer", "tiktok", "blogger", "goodvides", "ootd"],
+    "insta": ["instagram", "youtube", "sponsor", "influencer", "tiktok", "blogger", "goodvibes", "ootd"],
     "lifestyle": ["lifestyle", "home", "architecture", "minimalism", "throwback", "decor", "interior", "art"], 
     "rand": ["stayhome", "random", "spring", "summer", "fall", "winter", "fitness", "family"]
 }
